@@ -1,0 +1,9 @@
+---
+- hosts:
+    - vm1
+  vars_files:
+    - !/ansible/host_vars/host.yml
+  tasks:
+    - name: Receive name of the network interface on the server
+      shell: ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//"
+      

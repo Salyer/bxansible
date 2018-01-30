@@ -1,0 +1,7 @@
+os7_server: centos7
+os6_server: centos6
+
+php_time: "test"
+mysql_time: "test"
+system_time: "test"
+network_interface : "default"

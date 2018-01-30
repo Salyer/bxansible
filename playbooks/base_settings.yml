@@ -1,0 +1,33 @@
+---
+- hosts:
+    - all
+  vars_files:
+    - ~/ansible/host_vars/host.yml
+  vars:
+    - new_system_time: "test"   
+  tasks:
+  
+    - name: Check interface server name 
+      shell: ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//"
+      register: interface_name
+      
+    - name: Delete pool on the server
+      shell: /opt/webdir/bin/wrapper_ansible_conf -a delete_pool
+    
+    - name: waiting
+      wait_for:
+        timeout: 20
+
+    - name: Create pool on the server with network interface name eth0
+      shell: /opt/webdir/bin/wrapper_ansible_conf -a create -H server1 -I {{ interface_name.stdout }}
+      
+    - name: waiting
+      wait_for:
+        timeout: 20
+        
+    - name: Configuration of timezone
+      shell: /opt/webdir/bin/wrapper_ansible_conf -a timezone --timezone Europe/Kaliningrad --php
+    
+    - name: Compare of server, datebase and php time
+      shell: date '+%Y-%m-%d %H:%M'
+      register system_time          

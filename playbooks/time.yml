@@ -1,0 +1,29 @@
+---
+- hosts:
+    - vm2
+  vars:
+    username : "root"
+  tasks:
+#    - name: BDPassword
+#      shell: cat ~/.my.cnf | grep password | sed -e "s/^.*=.//" | sed -e "s/'.*//"
+#      register: dbpass
+    - name: Check server time
+      shell: date '+%Y-%m-%d %H:%M:$S'
+      register: system_time
+    - name: Check php time
+      shell: php -r 'echo date("Y-m-d H:i");'
+      register: php_time
+    - name: Check database time
+      command: mysql -u {{ username }} -Ns -e "SELECT DATE_FORMAT(now(), '%Y-%m-%d %H:%i');"
+      register: database_time
+    - name: Time is correct
+      shell: cat ~/ansible/result | echo Time settings in pull done  > ~/ansible/result  
+      delegate_to: 127.0.0.1
+      when: ((system_time.stdout==php_time.stdout) and (system_time.stdout==database_time.stdout))  
+    - name: Print if bad
+      shell: cat ~/ansible/result | echo Time settings in pull had problem  > ~/ansible/result  
+      delegate_to: 127.0.0.1
+      when: ((system_time.stdout!=php_time.stdout) or (system_time.stdout!=database_time.stdout))
+#   - name: Show
+#      shell: cat ~/file | echo "system time {{ system_time.stdout }}, php time {{ php_time.stdout }}, database time {{ database_time.stdout }}" >> ~/file
+
